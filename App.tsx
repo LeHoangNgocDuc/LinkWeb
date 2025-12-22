@@ -29,6 +29,8 @@ const App: React.FC = () => {
         { id: '1', title: 'Gmail Công việc', url: 'https://mail.google.com', category: Category.WORK, createdAt: Date.now() },
         { id: '2', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: Date.now() },
         { id: '3', title: 'Canva Design', url: 'https://canva.com', category: Category.TOOLS, createdAt: Date.now() },
+        { id: '4', title: 'ChatGPT', url: 'https://chatgpt.com', category: Category.AI, createdAt: Date.now() },
+        { id: '5', title: 'Google Gemini', url: 'https://gemini.google.com', category: Category.AI, createdAt: Date.now() },
       ];
       setLinks(initialLinks);
     }
@@ -156,9 +158,8 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Mobile Navbar Indicator / Bottom Bar for future enhancements */}
+        {/* Mobile Navbar Indicator */}
         <footer className="lg:hidden sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-gray-100 p-4 flex justify-around">
-           {/* Sidebar can be converted to a drawer for mobile in a real app */}
            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">© 2024 An Phúc Link Hub</p>
         </footer>
       </main>
