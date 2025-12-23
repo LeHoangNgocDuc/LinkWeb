@@ -10,6 +10,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onReset }) => {
+  // Danh sách các mục Sidebar được định nghĩa cố định để luôn luôn hiển thị đầy đủ
   const menuItems = [
     { label: 'Tất cả', id: null, icon: <LayoutDashboard size={20} /> },
     { label: Category.SCHOOL, id: Category.SCHOOL, icon: <GraduationCap size={20} /> },
@@ -22,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onR
   return (
     <aside className="w-[280px] flex-shrink-0 hidden lg:flex flex-col p-6 border-r border-gray-100 bg-[#f0f7ff] h-screen sticky top-0 overflow-y-auto">
       <div className="flex items-center gap-4 mb-10 px-2">
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-200">
+        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-200 transition-transform hover:scale-105 cursor-pointer" onClick={() => onCategorySelect(null)}>
           <Heart size={28} fill="white" />
         </div>
         <div>
@@ -37,13 +38,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onR
           <button
             key={item.label}
             onClick={() => onCategorySelect(item.id)}
-            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-[1.25rem] transition-all duration-300 ${
+            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-[1.25rem] transition-all duration-300 group ${
               activeCategory === item.id 
               ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' 
-              : 'text-gray-500 hover:bg-white hover:text-blue-600 hover:shadow-sm'
+              : 'text-gray-500 hover:bg-white hover:text-blue-600 hover:shadow-md'
             }`}
           >
-            <span className={`${activeCategory === item.id ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`${activeCategory === item.id ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'} transition-colors`}>
               {item.icon}
             </span>
             <span className="font-bold text-[15px]">{item.label}</span>
@@ -54,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onR
       <div className="mt-8 space-y-4">
         <button
           onClick={onReset}
-          className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-white hover:bg-blue-50 text-blue-600 rounded-2xl transition-all border border-blue-50 text-[13px] font-bold shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-white hover:bg-blue-50 text-blue-600 rounded-2xl transition-all border border-blue-50 text-[13px] font-bold shadow-sm active:scale-95"
         >
           <RefreshCcw size={18} />
           Làm mới danh sách
@@ -63,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onR
         <div className="bg-blue-50/60 p-6 rounded-[2rem] border border-blue-100/50">
           <p className="text-sm font-extrabold text-blue-900 mb-2">Mẹo nhỏ</p>
           <p className="text-xs text-blue-700 leading-relaxed font-medium">
-            Nhấn <strong className="font-bold">Làm mới</strong> để cập nhật các liên kết mới nhất từ hệ thống.
+            Nhấn <strong className="font-bold">Làm mới</strong> để cập nhật các liên kết mới nhất từ hệ thống (AiStudio, Vnedu...).
           </p>
         </div>
       </div>

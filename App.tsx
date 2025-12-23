@@ -7,8 +7,8 @@ import Sidebar from './components/Sidebar';
 import LinkCard from './components/LinkCard';
 import AddEditModal from './components/AddEditModal';
 
-// Nâng cấp lên v4 để đảm bảo Vercel xóa bỏ dữ liệu cũ hoàn toàn
-const STORAGE_KEY = 'anphuc_links_v4'; 
+// Nâng cấp lên v5 để xóa hoàn toàn cache cũ trên Vercel/Trình duyệt
+const STORAGE_KEY = 'anphuc_links_v5'; 
 
 const App: React.FC = () => {
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -17,65 +17,69 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null);
 
-  // Danh sách hệ thống mới nhất theo yêu cầu
+  // Danh sách hệ thống chuẩn theo yêu cầu mới nhất
   const SYSTEM_LINKS: LinkItem[] = [
     // Trường học
-    { id: 's1', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: 1 },
-    { id: 's2', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: 2 },
+    { id: 'sys-school-1', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: 101 },
+    { id: 'sys-school-2', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: 102 },
     
     // Trung tâm An Phúc
-    { id: 's3', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: 3 },
-    { id: 's4', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: 4 },
-    { id: 's11', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: 5 },
+    { id: 'sys-ap-1', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: 201 },
+    { id: 'sys-ap-2', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: 202 },
+    { id: 'sys-ap-3', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: 203 },
     
-    // Công cụ AI
-    { id: 's7', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/', category: Category.AI, createdAt: 6 },
-    { id: 's8', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app', category: Category.AI, createdAt: 7 },
-    { id: 's9', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app', category: Category.AI, createdAt: 8 },
-    { id: 'ai-1', title: 'AiStudioDuc', url: 'https://aistudio.google.com/u/2/404', category: Category.AI, createdAt: 9 },
-    { id: 'ai-2', title: 'AiStudioTunhien', url: 'https://aistudio.google.com/u/2/404', category: Category.AI, createdAt: 10 },
+    // Công cụ AI (Thêm AiStudio)
+    { id: 'sys-ai-1', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/', category: Category.AI, createdAt: 301 },
+    { id: 'sys-ai-2', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app', category: Category.AI, createdAt: 302 },
+    { id: 'sys-ai-3', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app', category: Category.AI, createdAt: 303 },
+    { id: 'sys-ai-4', title: 'AiStudioDuc', url: 'https://aistudio.google.com/u/2/404', category: Category.AI, createdAt: 304 },
+    { id: 'sys-ai-5', title: 'AiStudioTunhien', url: 'https://aistudio.google.com/u/2/404', category: Category.AI, createdAt: 305 },
     
-    // Công cụ Web (Vercel được chuyển xuống đây)
-    { id: 's5', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: 11 },
-    { id: 's6', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.TOOLS, createdAt: 12 },
-    { id: 's10', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: 13 },
+    // Công cụ Web (Vercel nằm ở đây)
+    { id: 'sys-web-1', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: 401 },
+    { id: 'sys-web-2', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.TOOLS, createdAt: 402 },
+    { id: 'sys-web-3', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: 403 },
   ];
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    let finalLinks: LinkItem[] = [];
-
+    
     if (saved) {
       try {
-        finalLinks = JSON.parse(saved);
-        // Kiểm tra bổ sung nếu thiếu link hệ thống mới (như AiStudio)
-        const existingUrls = new Set(finalLinks.map((l: any) => l.url.toLowerCase()));
+        const parsedData = JSON.parse(saved);
+        // Tự động kiểm tra và gộp các link hệ thống còn thiếu nếu có cập nhật code mới
+        const existingUrls = new Set(parsedData.map((l: any) => l.url.toLowerCase()));
         const missing = SYSTEM_LINKS.filter(s => !existingUrls.has(s.url.toLowerCase()));
+        
         if (missing.length > 0) {
-          finalLinks = [...finalLinks, ...missing];
+          const merged = [...parsedData, ...missing];
+          setLinks(merged);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        } else {
+          setLinks(parsedData);
         }
       } catch (e) {
-        finalLinks = SYSTEM_LINKS;
+        resetToDefaults();
       }
     } else {
-      finalLinks = SYSTEM_LINKS;
+      // Lần đầu vào hoặc sau khi nâng version key
+      resetToDefaults();
     }
-
-    setLinks(finalLinks);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(finalLinks));
   }, []);
 
-  useEffect(() => {
-    if (links.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
-    }
-  }, [links]);
+  const resetToDefaults = () => {
+    setLinks(SYSTEM_LINKS);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(SYSTEM_LINKS));
+    setActiveCategory(null);
+    // Xóa cache các version cũ nếu có
+    localStorage.removeItem('anphuc_links');
+    localStorage.removeItem('anphuc_links_v3');
+    localStorage.removeItem('anphuc_links_v4');
+  };
 
   const handleResetDefaults = () => {
-    if (window.confirm('Cập nhật lại danh sách liên kết từ hệ thống (Bao gồm AiStudio và Vercel mới)?')) {
-      setLinks(SYSTEM_LINKS);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(SYSTEM_LINKS));
-      setActiveCategory(null);
+    if (window.confirm('Cập nhật lại toàn bộ danh sách liên kết từ hệ thống? Các liên kết bạn tự thêm sẽ được giữ lại nếu không trùng URL.')) {
+      resetToDefaults();
     }
   };
 
@@ -89,14 +93,17 @@ const App: React.FC = () => {
     });
   }, [links, searchQuery, activeCategory]);
 
+  // Luôn tạo các section cho TẤT CẢ danh mục để hiển thị đầy đủ tiêu đề
   const sections = Object.values(Category).map(cat => ({
     name: cat,
     links: filteredLinks.filter(l => l.category === cat)
-  })).filter(s => s.links.length > 0);
+  }));
 
   const handleAddOrEdit = (data: LinkFormData) => {
     if (editingLink) {
-      setLinks(prev => prev.map(l => l.id === editingLink.id ? { ...l, ...data } : l));
+      const updated = links.map(l => l.id === editingLink.id ? { ...l, ...data } : l);
+      setLinks(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       setEditingLink(null);
     } else {
       const newLink: LinkItem = {
@@ -104,13 +111,17 @@ const App: React.FC = () => {
         id: generateId(),
         createdAt: Date.now()
       };
-      setLinks(prev => [newLink, ...prev]);
+      const updated = [newLink, ...links];
+      setLinks(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     }
   };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Xóa liên kết này?')) {
-      setLinks(prev => prev.filter(l => l.id !== id));
+      const updated = links.filter(l => l.id !== id);
+      setLinks(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     }
   };
 
@@ -150,8 +161,9 @@ const App: React.FC = () => {
         </header>
 
         <div className="flex-1 p-6 sm:p-8 lg:p-10 space-y-12">
-          {sections.length > 0 ? (
-            sections.map(section => (
+          {sections.map(section => (
+            // Chỉ hiển thị section nếu nó có links HOẶC nếu đang không tìm kiếm (để show cấu trúc trang)
+            (section.links.length > 0 || (!searchQuery && !activeCategory)) && (
               <section key={section.name} className="animate-in fade-in slide-in-from-bottom-2 duration-700">
                 <div className="flex items-center gap-4 mb-6">
                   <h2 className="text-sm font-extrabold text-gray-400 uppercase tracking-[0.2em]">{section.name}</h2>
@@ -161,24 +173,32 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {section.links.map(link => (
-                    <LinkCard 
-                      key={link.id} 
-                      link={link} 
-                      onEdit={openEditModal} 
-                      onDelete={handleDelete} 
-                    />
-                  ))}
-                </div>
+                {section.links.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {section.links.map(link => (
+                      <LinkCard 
+                        key={link.id} 
+                        link={link} 
+                        onEdit={openEditModal} 
+                        onDelete={handleDelete} 
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 border-2 border-dashed border-gray-100 rounded-3xl flex items-center justify-center text-gray-300 text-xs font-medium italic">
+                    Chưa có liên kết trong danh mục này
+                  </div>
+                )}
               </section>
-            ))
-          ) : (
+            )
+          ))}
+          
+          {links.length === 0 && (
             <div className="flex flex-col items-center justify-center py-40 text-gray-400">
               <Search size={64} className="mb-4 opacity-10" />
-              <p className="font-medium">Không tìm thấy liên kết phù hợp</p>
+              <p className="font-medium">Chưa có dữ liệu liên kết</p>
               <button onClick={handleResetDefaults} className="mt-4 text-blue-600 text-sm font-bold flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-                <RefreshCcw size={16} /> Khôi phục mặc định
+                <RefreshCcw size={16} /> Tải lại dữ liệu hệ thống
               </button>
             </div>
           )}
