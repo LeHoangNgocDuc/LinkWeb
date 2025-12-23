@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, RefreshCcw } from 'lucide-react';
 import { LinkItem, Category, LinkFormData } from './types';
 import { generateId } from './utils/helpers';
 import Sidebar from './components/Sidebar';
 import LinkCard from './components/LinkCard';
 import AddEditModal from './components/AddEditModal';
+
+const STORAGE_KEY = 'anphuc_links_v3'; // Cập nhật key mới để ép trình duyệt load lại
 
 const App: React.FC = () => {
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -14,74 +16,66 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null);
 
-  // Danh sách hệ thống chuẩn
+  // Danh sách hệ thống chuẩn xác nhất
   const SYSTEM_LINKS: LinkItem[] = [
-    { id: 'sys-1', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: 1 },
-    { id: 'sys-2', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: 2 },
-    { id: 'sys-3', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: 3 },
-    { id: 'sys-4', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: 4 },
-    { id: 'sys-5', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: 5 },
-    { id: 'sys-6', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.AI, createdAt: 6 },
-    { id: 'sys-7', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/?utm_source=app_launcher&utm_medium=referral&original_referer=https%3A%2F%2Fogs.google.com%23&pli=1&authuser=1&pageId=none', category: Category.AI, createdAt: 7 },
-    { id: 'sys-8', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: 8 },
-    { id: 'sys-9', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: 9 },
-    { id: 'sys-10', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: 10 },
-    { id: 'sys-11', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: 11 },
+    { id: 's1', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: 1 },
+    { id: 's2', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: 2 },
+    { id: 's3', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: 3 },
+    { id: 's4', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: 4 },
+    { id: 's5', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: 5 },
+    { id: 's6', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.AI, createdAt: 6 },
+    { id: 's7', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/?utm_source=app_launcher&utm_medium=referral&original_referer=https%3A%2F%2Fogs.google.com%23&pli=1&authuser=1&pageId=none', category: Category.AI, createdAt: 7 },
+    { id: 's8', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: 8 },
+    { id: 's9', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: 9 },
+    { id: 's10', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: 10 },
+    { id: 's11', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: 11 },
   ];
 
-  // Hàm chuẩn hóa danh mục để khắc phục dữ liệu cũ trong LocalStorage
-  const normalizeCategory = (cat: any): Category => {
-    const catStr = String(cat).toLowerCase();
-    if (catStr.includes('school') || catStr.includes('trường')) return Category.SCHOOL;
-    if (catStr.includes('work') || catStr.includes('công việc')) return Category.WORK;
-    if (catStr.includes('an_phuc') || catStr.includes('an phúc') || catStr.includes('trung tâm')) return Category.AN_PHUC;
-    if (catStr.includes('ai')) return Category.AI;
-    if (catStr.includes('tools') || catStr.includes('công cụ web')) return Category.TOOLS;
-    return Category.TOOLS; // Mặc định
-  };
-
   useEffect(() => {
-    const saved = localStorage.getItem('anphuc_links');
-    let currentLinks: LinkItem[] = [];
+    const saved = localStorage.getItem(STORAGE_KEY);
+    let finalLinks: LinkItem[] = [];
 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Chuẩn hóa toàn bộ dữ liệu từ LocalStorage
-        currentLinks = parsed.map((l: any) => ({
-          ...l,
-          category: normalizeCategory(l.category)
-        }));
+        // Kiểm tra xem có đủ các link hệ thống quan trọng không
+        const existingUrls = new Set(parsed.map((l: any) => l.url.toLowerCase()));
+        const missing = SYSTEM_LINKS.filter(s => !existingUrls.has(s.url.toLowerCase()));
+        finalLinks = [...missing, ...parsed];
       } catch (e) {
-        currentLinks = SYSTEM_LINKS;
+        finalLinks = SYSTEM_LINKS;
       }
     } else {
-      currentLinks = SYSTEM_LINKS;
+      // Nếu chưa có v3, thử lấy từ bản cũ và gộp
+      const oldSaved = localStorage.getItem('anphuc_links');
+      if (oldSaved) {
+        try {
+          const oldData = JSON.parse(oldSaved);
+          finalLinks = [...SYSTEM_LINKS, ...oldData.filter((ol: any) => 
+            !SYSTEM_LINKS.some(sl => sl.url.toLowerCase() === ol.url.toLowerCase())
+          )];
+        } catch (e) {
+          finalLinks = SYSTEM_LINKS;
+        }
+      } else {
+        finalLinks = SYSTEM_LINKS;
+      }
     }
 
-    // Tự động kiểm tra và đồng bộ các link hệ thống còn thiếu
-    const existingUrls = new Set(currentLinks.map(l => l.url.toLowerCase()));
-    const missingLinks = SYSTEM_LINKS.filter(sys => !existingUrls.has(sys.url.toLowerCase()));
-
-    if (missingLinks.length > 0) {
-      const merged = [...missingLinks, ...currentLinks];
-      setLinks(merged);
-      localStorage.setItem('anphuc_links', JSON.stringify(merged));
-    } else {
-      setLinks(currentLinks);
-    }
+    setLinks(finalLinks);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(finalLinks));
   }, []);
 
   useEffect(() => {
     if (links.length > 0) {
-      localStorage.setItem('anphuc_links', JSON.stringify(links));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
     }
   }, [links]);
 
   const handleResetDefaults = () => {
-    if (window.confirm('Khôi phục toàn bộ danh sách về mặc định hệ thống? Các liên kết bạn tự thêm sẽ bị mất.')) {
+    if (window.confirm('Cập nhật lại toàn bộ danh sách liên kết từ hệ thống?')) {
       setLinks(SYSTEM_LINKS);
-      localStorage.setItem('anphuc_links', JSON.stringify(SYSTEM_LINKS));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(SYSTEM_LINKS));
       setActiveCategory(null);
     }
   };
@@ -127,21 +121,21 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen">
       <Sidebar 
         activeCategory={activeCategory} 
         onCategorySelect={setActiveCategory} 
         onReset={handleResetDefaults}
       />
 
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-white/60 backdrop-blur-xl border-b border-white/20 px-6 py-4 flex items-center justify-between gap-4">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#f8fafc]">
+        <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
-              placeholder="Tìm kiếm link..."
-              className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all shadow-sm"
+              placeholder="Tìm kiếm Vnedu, Mail, AI..."
+              className="w-full pl-11 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -149,43 +143,44 @@ const App: React.FC = () => {
 
           <button 
             onClick={() => { setEditingLink(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all active:scale-95"
           >
             <Plus size={20} />
-            <span className="hidden sm:inline">Thêm mới</span>
+            <span className="hidden sm:inline text-sm">Thêm Link</span>
           </button>
         </header>
 
-        <div className="flex-1 p-6 sm:p-8 lg:p-10 space-y-10">
-          {sections.map(section => (
-            <section key={section.name} className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-              <div className="flex items-center gap-4 mb-6">
-                <h2 className="text-lg font-extrabold text-gray-800 tracking-tight">{section.name}</h2>
-                <div className="h-[1px] flex-1 bg-gray-200"></div>
-                <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-100 px-2 py-0.5 rounded-md">
-                  {section.links.length}
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {section.links.map(link => (
-                  <LinkCard 
-                    key={link.id} 
-                    link={link} 
-                    onEdit={openEditModal} 
-                    onDelete={handleDelete} 
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-          
-          {sections.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-32 space-y-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300">
-                <Search size={32} />
-              </div>
-              <p className="text-gray-400 font-medium">Không có liên kết nào để hiển thị.</p>
+        <div className="flex-1 p-6 sm:p-8 lg:p-10 space-y-12">
+          {sections.length > 0 ? (
+            sections.map(section => (
+              <section key={section.name} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="flex items-center gap-4 mb-6">
+                  <h2 className="text-base font-extrabold text-gray-800 uppercase tracking-wider">{section.name}</h2>
+                  <div className="h-[1px] flex-1 bg-gray-200"></div>
+                  <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                    {section.links.length}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {section.links.map(link => (
+                    <LinkCard 
+                      key={link.id} 
+                      link={link} 
+                      onEdit={openEditModal} 
+                      onDelete={handleDelete} 
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+              <Search size={48} className="mb-4 opacity-20" />
+              <p className="font-medium">Không tìm thấy kết quả phù hợp</p>
+              <button onClick={handleResetDefaults} className="mt-4 text-blue-600 text-sm font-bold flex items-center gap-2">
+                <RefreshCcw size={16} /> Làm mới dữ liệu
+              </button>
             </div>
           )}
         </div>
