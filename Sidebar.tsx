@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Briefcase, Heart, Wrench, LayoutDashboard, Bot } from 'lucide-react';
+import { Briefcase, Heart, Wrench, LayoutDashboard, Bot, GraduationCap } from 'lucide-react';
 import { Category } from '../types';
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect }) => {
   const menuItems = [
     { label: 'Tất cả', id: null, icon: <LayoutDashboard size={20} /> },
+    { label: Category.SCHOOL, id: Category.SCHOOL, icon: <GraduationCap size={20} /> },
     { label: Category.WORK, id: Category.WORK, icon: <Briefcase size={20} /> },
     { label: Category.AN_PHUC, id: Category.AN_PHUC, icon: <Heart size={20} /> },
     { label: Category.AI, id: Category.AI, icon: <Bot size={20} /> },

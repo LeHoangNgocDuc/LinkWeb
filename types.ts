@@ -1,9 +1,10 @@
 
 export enum Category {
+  SCHOOL = 'Trường học',
   WORK = 'Công việc',
   AN_PHUC = 'Trung tâm An Phúc',
-  TOOLS = 'Công cụ Web',
-  AI = 'Công cụ AI'
+  AI = 'Công cụ AI',
+  TOOLS = 'Công cụ Web'
 }
 
 export interface LinkItem {

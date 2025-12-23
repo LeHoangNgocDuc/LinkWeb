@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Grid, List, LogOut } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { LinkItem, Category, LinkFormData } from './types';
 import { generateId } from './utils/helpers';
 import Sidebar from './components/Sidebar';
@@ -29,8 +29,17 @@ const App: React.FC = () => {
         { id: '1', title: 'Gmail Công việc', url: 'https://mail.google.com', category: Category.WORK, createdAt: Date.now() },
         { id: '2', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: Date.now() },
         { id: '3', title: 'Canva Design', url: 'https://canva.com', category: Category.TOOLS, createdAt: Date.now() },
-        { id: '4', title: 'ChatGPT', url: 'https://chatgpt.com', category: Category.AI, createdAt: Date.now() },
-        { id: '5', title: 'Google Gemini', url: 'https://gemini.google.com', category: Category.AI, createdAt: Date.now() },
+        { id: '4', title: 'ChatGPT', url: 'https://chatgpt.com/', category: Category.AI, createdAt: Date.now() },
+        { id: '5', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/?utm_source=app_launcher&utm_medium=referral&original_referer=https%3A%2F%2Fogs.google.com%23&pli=1&authuser=1&pageId=none', category: Category.AI, createdAt: Date.now() },
+        { id: '6', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
+        { id: '7', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
+        { id: '8', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: Date.now() },
+        { id: '9', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: Date.now() },
+        { id: '10', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.AI, createdAt: Date.now() },
+        { id: '11', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: Date.now() },
+        { id: '12', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: Date.now() },
+        { id: '13', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: Date.now() },
+        { id: '14', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: Date.now() },
       ];
       setLinks(initialLinks);
     }
@@ -38,7 +47,9 @@ const App: React.FC = () => {
 
   // Save to LocalStorage
   useEffect(() => {
-    localStorage.setItem('anphuc_links', JSON.stringify(links));
+    if (links.length > 0) {
+      localStorage.setItem('anphuc_links', JSON.stringify(links));
+    }
   }, [links]);
 
   const filteredLinks = useMemo(() => {
@@ -50,7 +61,7 @@ const App: React.FC = () => {
     });
   }, [links, searchQuery, activeCategory]);
 
-  // Grouped links for section layout
+  // Grouped links for section layout based on Enum order
   const sections = Object.values(Category).map(cat => ({
     name: cat,
     links: filteredLinks.filter(l => l.category === cat)
