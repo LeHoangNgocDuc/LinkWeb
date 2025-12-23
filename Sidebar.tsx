@@ -1,14 +1,15 @@
 
 import React from 'react';
-import { Briefcase, Heart, Wrench, LayoutDashboard, Bot, GraduationCap } from 'lucide-react';
+import { Briefcase, Heart, Wrench, LayoutDashboard, Bot, GraduationCap, RefreshCcw } from 'lucide-react';
 import { Category } from '../types';
 
 interface SidebarProps {
   activeCategory: string | null;
   onCategorySelect: (category: string | null) => void;
+  onReset: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect, onReset }) => {
   const menuItems = [
     { label: 'Tất cả', id: null, icon: <LayoutDashboard size={20} /> },
     { label: Category.SCHOOL, id: Category.SCHOOL, icon: <GraduationCap size={20} /> },
@@ -30,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect }) =
         </div>
       </div>
 
-      <nav className="space-y-2">
+      <nav className="space-y-2 overflow-y-auto flex-1 pr-2">
         <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Danh mục</p>
         {menuItems.map((item) => (
           <button
@@ -48,11 +49,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory, onCategorySelect }) =
         ))}
       </nav>
 
-      <div className="mt-auto pt-10">
+      <div className="mt-auto space-y-4">
+        <button
+          onClick={onReset}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/40 hover:bg-white/60 text-blue-600 rounded-2xl transition-all border border-white/50 text-xs font-bold"
+          title="Khôi phục danh sách mặc định mới nhất"
+        >
+          <RefreshCcw size={16} />
+          Làm mới danh sách
+        </button>
+
         <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-3xl border border-white/50">
           <p className="text-xs font-bold text-indigo-800 mb-1">Mẹo nhỏ</p>
           <p className="text-[11px] text-indigo-600 leading-relaxed">
-            Sử dụng phím <strong>/</strong> để tìm kiếm nhanh các liên kết của bạn.
+            Nhấn <strong>Làm mới</strong> để cập nhật các liên kết mới nhất từ hệ thống.
           </p>
         </div>
       </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, RefreshCcw } from 'lucide-react';
 import { LinkItem, Category, LinkFormData } from './types';
 import { generateId } from './utils/helpers';
 import Sidebar from './components/Sidebar';
@@ -14,34 +14,40 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null);
 
+  // Danh sách mặc định đầy đủ nhất theo yêu cầu của bạn
+  const DEFAULT_LINKS: LinkItem[] = [
+    { id: '9', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: Date.now() },
+    { id: '12', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: Date.now() },
+    { id: '1', title: 'Gmail Công việc', url: 'https://mail.google.com', category: Category.WORK, createdAt: Date.now() },
+    { id: '2', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: Date.now() },
+    { id: '13', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: Date.now() },
+    { id: '14', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: Date.now() },
+    { id: '4', title: 'ChatGPT', url: 'https://chatgpt.com/', category: Category.AI, createdAt: Date.now() },
+    { id: '5', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/?utm_source=app_launcher&utm_medium=referral&original_referer=https%3A%2F%2Fogs.google.com%23&pli=1&authuser=1&pageId=none', category: Category.AI, createdAt: Date.now() },
+    { id: '6', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
+    { id: '7', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
+    { id: '10', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.AI, createdAt: Date.now() },
+    { id: '3', title: 'Canva Design', url: 'https://canva.com', category: Category.TOOLS, createdAt: Date.now() },
+    { id: '8', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: Date.now() },
+    { id: '11', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: Date.now() },
+  ];
+
   // Load from LocalStorage
   useEffect(() => {
     const saved = localStorage.getItem('anphuc_links');
     if (saved) {
       try {
-        setLinks(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setLinks(parsed);
+        } else {
+          setLinks(DEFAULT_LINKS);
+        }
       } catch (e) {
-        console.error('Failed to parse links from localStorage');
+        setLinks(DEFAULT_LINKS);
       }
     } else {
-      // Default links if empty
-      const initialLinks: LinkItem[] = [
-        { id: '1', title: 'Gmail Công việc', url: 'https://mail.google.com', category: Category.WORK, createdAt: Date.now() },
-        { id: '2', title: 'An Phúc Website', url: 'https://trungtamanphuc.vn', category: Category.AN_PHUC, createdAt: Date.now() },
-        { id: '3', title: 'Canva Design', url: 'https://canva.com', category: Category.TOOLS, createdAt: Date.now() },
-        { id: '4', title: 'ChatGPT', url: 'https://chatgpt.com/', category: Category.AI, createdAt: Date.now() },
-        { id: '5', title: 'NoteBookDuc', url: 'https://notebooklm.google.com/?utm_source=app_launcher&utm_medium=referral&original_referer=https%3A%2F%2Fogs.google.com%23&pli=1&authuser=1&pageId=none', category: Category.AI, createdAt: Date.now() },
-        { id: '6', title: 'geminiDuc', url: 'https://gemini.google.com/u/1/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
-        { id: '7', title: 'GeminiTunhien', url: 'https://gemini.google.com/u/2/app?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all&pageId=none', category: Category.AI, createdAt: Date.now() },
-        { id: '8', title: 'GifhubTunhien', url: 'https://github.com/LeHoangNgocDuc', category: Category.TOOLS, createdAt: Date.now() },
-        { id: '9', title: 'Vnedu', url: 'https://ouzvvavumsgdkhanhhoa.vnedu.vn/v5/', category: Category.SCHOOL, createdAt: Date.now() },
-        { id: '10', title: 'VercelTunhien', url: 'https://vercel.com/lehoangngocducs-projects', category: Category.AI, createdAt: Date.now() },
-        { id: '11', title: 'Netlìy', url: 'https://app.netlify.com/teams/thdtunhien/projects', category: Category.TOOLS, createdAt: Date.now() },
-        { id: '12', title: 'Mailtruong', url: 'https://mail.google.com/mail/u/0/#inbox', category: Category.SCHOOL, createdAt: Date.now() },
-        { id: '13', title: 'Thuphi', url: 'https://diemdanhvathuphi.netlify.app/', category: Category.AN_PHUC, createdAt: Date.now() },
-        { id: '14', title: 'VeHInh', url: 'https://web-dung-hinh.vercel.app/', category: Category.AN_PHUC, createdAt: Date.now() },
-      ];
-      setLinks(initialLinks);
+      setLinks(DEFAULT_LINKS);
     }
   }, []);
 
@@ -52,16 +58,26 @@ const App: React.FC = () => {
     }
   }, [links]);
 
+  const handleResetDefaults = () => {
+    if (window.confirm('Bạn có muốn khôi phục danh sách liên kết mặc định? Thao tác này sẽ hiển thị các liên kết mới nhất như Vnedu, Thuphi, VeHInh...')) {
+      setLinks(DEFAULT_LINKS);
+      localStorage.setItem('anphuc_links', JSON.stringify(DEFAULT_LINKS));
+      setActiveCategory(null);
+      setSearchQuery('');
+    }
+  };
+
   const filteredLinks = useMemo(() => {
     return links.filter(link => {
-      const matchesSearch = link.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          link.url.toLowerCase().includes(searchQuery.toLowerCase());
+      const title = link.title?.toLowerCase() || '';
+      const url = link.url?.toLowerCase() || '';
+      const search = searchQuery.toLowerCase();
+      const matchesSearch = title.includes(search) || url.includes(search);
       const matchesCategory = activeCategory ? link.category === activeCategory : true;
       return matchesSearch && matchesCategory;
     });
   }, [links, searchQuery, activeCategory]);
 
-  // Grouped links for section layout based on Enum order
   const sections = Object.values(Category).map(cat => ({
     name: cat,
     links: filteredLinks.filter(l => l.category === cat)
@@ -94,10 +110,13 @@ const App: React.FC = () => {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar activeCategory={activeCategory} onCategorySelect={setActiveCategory} />
+      <Sidebar 
+        activeCategory={activeCategory} 
+        onCategorySelect={setActiveCategory} 
+        onReset={handleResetDefaults}
+      />
 
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
         <header className="sticky top-0 z-30 bg-white/40 backdrop-blur-xl border-b border-white/20 px-6 py-4 flex items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -124,7 +143,6 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Content Area */}
         <div className="flex-1 p-6 sm:p-8 lg:p-10 space-y-12">
           {sections.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -132,16 +150,7 @@ const App: React.FC = () => {
                 <Search size={40} />
               </div>
               <h3 className="text-xl font-bold text-gray-700">Không tìm thấy kết quả nào</h3>
-              <p className="text-gray-500 mt-2 max-w-xs">Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác nhé!</p>
-              <button 
-                onClick={() => {
-                  setSearchQuery('');
-                  setActiveCategory(null);
-                }}
-                className="mt-6 text-blue-600 font-semibold hover:underline"
-              >
-                Xóa bộ lọc
-              </button>
+              <p className="text-gray-500 mt-2 max-w-xs">Nếu bạn không thấy các liên kết mới, hãy nhấn nút "Làm mới danh sách" ở thanh bên!</p>
             </div>
           ) : (
             sections.map(section => (
@@ -169,9 +178,9 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Mobile Navbar Indicator */}
-        <footer className="lg:hidden sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-gray-100 p-4 flex justify-around">
+        <footer className="lg:hidden sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-gray-100 p-4 flex justify-between items-center px-6">
            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">© 2024 An Phúc Link Hub</p>
+           <button onClick={handleResetDefaults} className="text-blue-600"><RefreshCcw size={18}/></button>
         </footer>
       </main>
 
